@@ -1,13 +1,13 @@
 {
   "name": "generate-router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "A utility to generate TypeScript route definitions for Next.js projects.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "generate-router": "dist/cli.js"
+    "generate-router": "dist/cli.cjs"
   },
   "scripts": {
     "build": "rollup -c",

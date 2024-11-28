@@ -19,14 +19,13 @@ pnpm add generate-router
 라이브러리는 TypeScript 경로 정의를 생성하기 위한 CLI 도구를 제공합니다. 설치 후, `generate-router` 명령어를 사용할 수 있습니다:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts pages
+npx generate-router ./pages ./types/routes.d.ts
 ```
 
 ### Positional Arguments
 
 1. `<pagesDir>`: Next.js 프로젝트의 `pages` 또는 `app` 디렉토리 경로. (필수)
 2. `<outputFile>`: 생성된 TypeScript 정의 파일의 출력 경로. (필수)
-3. `<route>`: 라우팅 유형, `pages`(Page Router) 또는 `app`(App Router). (필수)
 
 ### 예시
 
@@ -43,7 +42,7 @@ pages/
 아래 명령어를 실행하면:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts pages
+npx generate-router ./pages ./types/routes.d.ts
 ```
 
 `./types/routes.d.ts` 파일이 다음 내용으로 생성됩니다:
@@ -66,7 +65,7 @@ type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
 
 ```json
 "scripts": {
-  "generate:routes": "generate-router ./pages ./src/routes.d.ts pages"
+  "generate:routes": "generate-router ./pages ./src/routes.d.ts"
 }
 ```
 
@@ -83,7 +82,7 @@ TypeScript 또는 JavaScript 코드 내에서 라이브러리를 사용할 수�
 ```typescript
 import { generateRoutes } from 'generate-router';
 
-generateRoutes('./pages', './types/routes.d.ts', 'pages');
+generateRoutes('./pages', './types/routes.d.ts');
 ```
 
 ## 개발

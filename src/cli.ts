@@ -1,15 +1,34 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { generateRoutes } from './generator';
+import path from 'path';
+import fs from 'fs';
 
+/**
+ * Determine the route type (pages or app) based on the directory structure.
+ * @param dir - Directory to check.
+ * @returns 'pages' if the directory contains a pages structure, 'app' otherwise.
+ */
+const determineRouteType = (dir: string): 'pages' | 'app' => {
+    const resolvedDir = path.resolve(dir);
+    if (fs.existsSync(path.join(resolvedDir, 'app'))) {
+        return 'app';
+    }
+    if (fs.existsSync(path.join(resolvedDir, 'pages'))) {
+        return 'pages';
+    }
+    throw new Error(`Invalid directory structure: '${dir}'. Expected 'pages' or 'app' directory.`);
+};
+
+// CLI definition
 yargs(hideBin(process.argv))
     .command(
-        '$0 <pagesDir> <outputFile> <route>',
+        '$0 <pagesDir> <outputFile>',
         'Generate TypeScript route definitions for Next.js projects',
         (yargs) => {
             return yargs
                 .positional('pagesDir', {
-                    describe: 'Path to the Next.js pages or app directory',
+                    describe: 'Path to the Next.js root directory containing pages or app',
                     type: 'string',
                     demandOption: true,
                 })
@@ -17,17 +36,20 @@ yargs(hideBin(process.argv))
                     describe: 'Path to the output TypeScript definition file',
                     type: 'string',
                     demandOption: true,
-                })
-                .positional('route', {
-                    describe: 'Route type (pages or app)',
-                    type: 'string',
-                    choices: ['pages', 'app'],
-                    demandOption: true,
                 });
         },
         (argv) => {
-            // Call the generateRoutes function with parsed arguments
-            generateRoutes(argv.pagesDir, argv.outputFile, argv.route as 'pages' | 'app');
+            try {
+                const routeType = determineRouteType(argv.pagesDir);
+                generateRoutes(argv.pagesDir, argv.outputFile, routeType);
+                console.log(`Route definitions generated successfully for ${routeType} router.`);
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error(error.message);
+                } else {
+                    console.error('Unknown error', error);
+                }
+            }
         }
     )
     .help()

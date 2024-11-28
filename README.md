@@ -19,14 +19,13 @@ pnpm add generate-router
 The library provides a CLI tool to generate TypeScript route definitions. After installation, you can use the `generate-router` command:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts pages
+npx generate-router ./pages ./types/routes.d.ts
 ```
 
 ### Positional Arguments
 
 1. `<pagesDir>`: Path to the `pages` or `app` directory in your Next.js project. (Required)
 2. `<outputFile>`: Path to the output TypeScript definition file. (Required)
-3. `<route>`: Routing type, either `pages` for Page Router or `app` for App Router. (Required)
 
 ### Example
 
@@ -43,7 +42,7 @@ pages/
 Running the following command:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts pages
+npx generate-router ./pages ./types/routes.d.ts
 ```
 
 Will generate a file at `./types/routes.d.ts` with the following content:
@@ -66,7 +65,7 @@ You can also define a script in your `package.json` for easier usage:
 
 ```json
 "scripts": {
-"generate:routes": "generate-router ./pages ./src/routes.d.ts pages"
+  "generate:routes": "generate-router ./pages ./src/routes.d.ts"
 }
 ```
 
@@ -83,7 +82,7 @@ You can also use the library in your TypeScript or JavaScript code:
 ```typescript
 import { generateRoutes } from 'generate-router';
 
-generateRoutes('./pages', './types/routes.d.ts', 'pages');
+generateRoutes('./pages', './types/routes.d.ts');
 ```
 
 ## Development

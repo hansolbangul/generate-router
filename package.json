@@ -1,6 +1,6 @@
 {
   "name": "generate-router",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "description": "A utility to generate TypeScript route definitions for Next.js projects.",
   "main": "dist/index.js",

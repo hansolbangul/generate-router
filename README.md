@@ -19,14 +19,14 @@ pnpm add generate-router
 The library provides a CLI tool to generate TypeScript route definitions. After installation, you can use the `generate-router` command:
 
 ```bash
-npx generate-router --pagesDir=./pages --outputFile=./types/routes.d.ts --route=pages
+npx generate-router ./pages ./types/routes.d.ts pages
 ```
 
-### Options
+### Positional Arguments
 
-- `--pagesDir` (or `-p`): Path to the `pages` or `app` directory in your Next.js project. (Required)
-- `--outputFile` (or `-o`): Path to the output TypeScript definition file. (Required)
-- `--route` (or `-r`): Routing type, either `pages` for Page Router or `app` for App Router. (Required)
+1. `<pagesDir>`: Path to the `pages` or `app` directory in your Next.js project. (Required)
+2. `<outputFile>`: Path to the output TypeScript definition file. (Required)
+3. `<route>`: Routing type, either `pages` for Page Router or `app` for App Router. (Required)
 
 ### Example
 
@@ -43,7 +43,7 @@ pages/
 Running the following command:
 
 ```bash
-npx generate-router --pagesDir=./pages --outputFile=./types/routes.d.ts --route=pages
+npx generate-router ./pages ./types/routes.d.ts pages
 ```
 
 Will generate a file at `./types/routes.d.ts` with the following content:
@@ -51,13 +51,29 @@ Will generate a file at `./types/routes.d.ts` with the following content:
 ```typescript
 // This file is auto-generated. Do not edit manually.
 type StaticPaths =
-  | '/'
-  | '/about';
+    | '/'
+    | '/about';
 
 type DynamicPaths =
-  | `/user/${string}`;
+    | `/user/${string}`;
 
 type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
+```
+
+### Using npm scripts
+
+You can also define a script in your `package.json` for easier usage:
+
+```json
+"scripts": {
+"generate:routes": "generate-router ./pages ./src/routes.d.ts pages"
+}
+```
+
+Now you can run:
+
+```bash
+yarn generate:routes
 ```
 
 ### Programmatic Usage

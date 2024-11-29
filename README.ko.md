@@ -1,6 +1,8 @@
-### Korean README
-
 # Generate Router
+
+[![npm version](https://badge.fury.io/js/generate-router.svg)][npm_url]
+[![downloads](https://img.shields.io/npm/dt/generate-router.svg)][npm_url]
+[![license](https://img.shields.io/npm/l/generate-router.svg)][npm_url]
 
 Next.js 프로젝트용 TypeScript 경로 정의를 생성하는 유틸리티입니다. 이 도구는 `pages`(Page Router)와 `app`(App Router) 구조를 모두 지원하며, 타입 안전한 경로 정의를 생성할 수 있습니다.
 

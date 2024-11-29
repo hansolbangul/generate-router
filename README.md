@@ -4,6 +4,8 @@
 [![downloads](https://img.shields.io/npm/dt/generate-router.svg)][npm_url]
 [![license](https://img.shields.io/npm/l/generate-router.svg)][npm_url]
 
+[npm_url]: https://www.npmjs.com/package/generate-router
+
 A utility to generate TypeScript route definitions for Next.js projects. This tool supports both `pages` (Page Router) and `app` (App Router) structures, allowing you to create type-safe route definitions.
 
 ## Installation

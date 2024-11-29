@@ -1,6 +1,8 @@
-### English README
-
 # Generate Router
+
+[![npm version](https://badge.fury.io/js/generate-router.svg)][npm_url]
+[![downloads](https://img.shields.io/npm/dt/generate-router.svg)][npm_url]
+[![license](https://img.shields.io/npm/l/generate-router.svg)][npm_url]
 
 A utility to generate TypeScript route definitions for Next.js projects. This tool supports both `pages` (Page Router) and `app` (App Router) structures, allowing you to create type-safe route definitions.
 

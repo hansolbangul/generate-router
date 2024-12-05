@@ -11,10 +11,14 @@ import fs from 'fs';
  */
 const determineRouteType = (dir: string): 'pages' | 'app' => {
     const resolvedDir = path.resolve(dir);
-    if (fs.existsSync(path.join(resolvedDir, 'app'))) {
+    if(!fs.existsSync(resolvedDir)) {
+        throw new Error(`Invalid directory structure: '${dir}'. Expected 'pages' or 'app' directory.`);
+    }
+
+    if (path.basename(dir) === 'app') {
         return 'app';
     }
-    if (fs.existsSync(path.join(resolvedDir, 'pages'))) {
+    if (path.basename(dir) === 'pages') {
         return 'pages';
     }
     throw new Error(`Invalid directory structure: '${dir}'. Expected 'pages' or 'app' directory.`);
@@ -40,8 +44,8 @@ yargs(hideBin(process.argv))
         },
         (argv) => {
             try {
-                const routeType = determineRouteType(argv.pagesDir);
-                generateRoutes(argv.pagesDir, argv.outputFile, routeType);
+                const routeType = determineRouteType(argv.pagesDir as string);
+                generateRoutes(argv.pagesDir as string, argv.outputFile as string, routeType);
                 console.log(`Route definitions generated successfully for ${routeType} router.`);
             } catch (error) {
                 if (error instanceof Error) {

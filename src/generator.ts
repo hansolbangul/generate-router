@@ -9,19 +9,30 @@ import path from 'path';
  * @returns A string containing the TypeScript type definitions.
  */
 export const generateTypeDefinition = (routes: string[]): string => {
-    const staticRoutes = routes.filter((route) => !route.includes('${'));
-    const dynamicRoutes = routes.filter((route) => route.includes('${'));
+  const staticRoutes = routes.filter((route) => !route.includes('${'));
+  const dynamicRoutes = routes.filter((route) => route.includes('${'));
 
-    return `// This file is auto-generated. Do not edit manually.
-type StaticPaths =
+  const staticPathsType = `type StaticPaths =
   ${staticRoutes.map((route) => `| '${route}'`).join('\n  ')};
 
-type DynamicPaths =
+`;
+
+  const dynamicPathsType = dynamicRoutes.length > 0
+    ? `type DynamicPaths =
   ${dynamicRoutes.map((route) => `| \`${route}\``).join('\n  ')};
 
-type RoutePath = StaticPaths | DynamicPaths | \`\$\{StaticPaths\}?\$\{string\}\`;
+`
+    : '';
+
+  const routePathType = `type RoutePath = StaticPaths${
+    dynamicRoutes.length > 0 ? ' | DynamicPaths' : ''
+  } | \`\$\{StaticPaths\}?\$\{string\}\`;
 `;
+
+  return `// This file is auto-generated. Do not edit manually.
+${staticPathsType}${dynamicPathsType}${routePathType}`;
 };
+
 
 /**
  * Main function to generate route types.

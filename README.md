@@ -26,6 +26,28 @@ The library provides a CLI tool to generate TypeScript route definitions. After 
 npx generate-router ./pages ./types/routes.d.ts
 ```
 
+### Using Type Overrides
+
+This library overrides the types for Next.js's `useRouter` (from `next/router` and `next/navigation`) and the `href` prop of the `Link` component. This ensures type safety and will result in TypeScript compilation errors if you try to use undefined routes.
+
+```typescript
+// Correct usage
+router.push('/about'); // Works fine
+router.push('/user/123'); // Works fine
+
+// Incorrect usage
+router.push('/invalid-path'); // Compilation error
+<Link href="/undefined-route">Invalid</Link> // Compilation error
+```
+
+To enable type overriding, add the `--override` or `-o` option when running the CLI:
+
+```bash
+npx generate-router ./pages ./types/routes.d.ts --override
+# or
+npx generate-router ./pages ./types/routes.d.ts -o
+```
+
 ### Arguments
 
 1. `<pagesDir>`: Path to the `pages` or `app` directory in your Next.js project. (Required)
@@ -68,22 +90,22 @@ type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
 
 // Next.js Router Type Overrides (when --override option is used)
 declare module 'next/router' {
-  import type { NextRouter as OriginalNextRouter } from 'next/router';
-
   interface UrlObject {
     pathname: RoutePath;
+    query?: { [key: string]: string | number | boolean | readonly string[] | undefined };
+    hash?: string;
   }
 
-  interface NextRouter extends OriginalNextRouter {
+  interface NextRouter extends Omit<import('next/dist/shared/lib/router/router').NextRouter, 'push' | 'replace'> {
     push(
       url: RoutePath | UrlObject,
       as?: string | UrlObject,
-      options?: TransitionOptions,
+      options?: TransitionOptions
     ): Promise<boolean>;
     replace(
       url: RoutePath | UrlObject,
       as?: string | UrlObject,
-      options?: TransitionOptions,
+      options?: TransitionOptions
     ): Promise<boolean>;
   }
 
@@ -91,18 +113,47 @@ declare module 'next/router' {
 }
 
 declare module 'next/navigation' {
-  interface NavigationRouter {
-    push(href: RoutePath, options?: { scroll?: boolean }): void;
-    replace(href: RoutePath, options?: { scroll?: boolean }): void;
-    prefetch(href: RoutePath): void;
-    back(): void;
-    forward(): void;
-    refresh(): void;
+  interface NavigationUrlObject {
+    pathname: RoutePath;
+    query?: { [key: string]: string | number | boolean | readonly string[] | undefined };
+    hash?: string;
   }
 
+  interface NavigationRouter extends Omit<import('next/dist/shared/lib/app-router-context.shared-runtime').AppRouterInstance, 'push' | 'replace'> {
+    push(href: RoutePath | NavigationUrlObject, options?: { scroll?: boolean }): void;
+    replace(href: RoutePath | NavigationUrlObject, options?: { scroll?: boolean }): void;
+    query: { [key: string]: string | string[] | undefined };
+  }
+
+  export { NavigationRouter };
   export function useRouter(): NavigationRouter;
   export function usePathname(): RoutePath;
-  export function useSearchParams(): URLSearchParams;
+  export function useSearchParams(): URLSearchParams & {
+    get(key: string): string | null;
+    getAll(): { [key: string]: string | string[] };
+  };
+}
+
+declare module 'next/link' {
+  export interface LinkProps
+    extends Omit<import('next/dist/client/link').LinkProps, 'href'> {
+    href:
+      | RoutePath
+      | {
+          pathname: RoutePath;
+          query?: {
+            [key: string]:
+              | string
+              | number
+              | boolean
+              | readonly string[]
+              | undefined;
+          };
+          hash?: string;
+        };
+  }
+
+  export default function Link(props: LinkProps): JSX.Element;
 }
 ```
 

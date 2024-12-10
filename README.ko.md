@@ -27,6 +27,28 @@ pnpm add generate-router
 npx generate-router ./pages ./types/routes.d.ts
 ```
 
+### 타입 오버라이딩 사용
+
+이 라이브러리는 Next.js의 `useRouter` (`next/router`, `next/navigation`)와 `Link` 컴포넌트의 `href` 속성에 대한 타입을 오버라이딩합니다. 이를 통해 타입 안전성이 보장되며, 정의되지 않은 경로를 사용하려고 할 경우 TypeScript 컴파일 에러가 발생합니다.
+
+```typescript
+// 올바른 사용 예시
+router.push('/about'); // 정상 작동
+router.push('/user/123'); // 정상 작동
+
+// 잘못된 사용 예시
+router.push('/invalid-path'); // 컴파일 에러
+<Link href="/undefined-route">Invalid</Link> // 컴파일 에러
+```
+
+타입 오버라이딩을 사용하려면 CLI 실행 시 `--override` 또는 `-o` 옵션을 추가하세요:
+
+```bash
+npx generate-router ./pages ./types/routes.d.ts --override
+# 또는
+npx generate-router ./pages ./types/routes.d.ts -o
+```
+
 ### 인자
 
 1. `<pagesDir>`: Next.js 프로젝트의 `pages` 또는 `app` 디렉토리 경로. (필수)
@@ -69,22 +91,22 @@ type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
 
 // Next.js 라우터 타입 오버라이드 (--override 옵션 사용 시)
 declare module 'next/router' {
-  import type { NextRouter as OriginalNextRouter } from 'next/router';
-
   interface UrlObject {
     pathname: RoutePath;
+    query?: { [key: string]: string | number | boolean | readonly string[] | undefined };
+    hash?: string;
   }
 
-  interface NextRouter extends OriginalNextRouter {
+  interface NextRouter extends Omit<import('next/dist/shared/lib/router/router').NextRouter, 'push' | 'replace'> {
     push(
       url: RoutePath | UrlObject,
       as?: string | UrlObject,
-      options?: TransitionOptions,
+      options?: TransitionOptions
     ): Promise<boolean>;
     replace(
       url: RoutePath | UrlObject,
       as?: string | UrlObject,
-      options?: TransitionOptions,
+      options?: TransitionOptions
     ): Promise<boolean>;
   }
 
@@ -92,19 +114,49 @@ declare module 'next/router' {
 }
 
 declare module 'next/navigation' {
-  interface NavigationRouter {
-    push(href: RoutePath, options?: { scroll?: boolean }): void;
-    replace(href: RoutePath, options?: { scroll?: boolean }): void;
-    prefetch(href: RoutePath): void;
-    back(): void;
-    forward(): void;
-    refresh(): void;
+  interface NavigationUrlObject {
+    pathname: RoutePath;
+    query?: { [key: string]: string | number | boolean | readonly string[] | undefined };
+    hash?: string;
   }
 
+  interface NavigationRouter extends Omit<import('next/dist/shared/lib/app-router-context.shared-runtime').AppRouterInstance, 'push' | 'replace'> {
+    push(href: RoutePath | NavigationUrlObject, options?: { scroll?: boolean }): void;
+    replace(href: RoutePath | NavigationUrlObject, options?: { scroll?: boolean }): void;
+    query: { [key: string]: string | string[] | undefined };
+  }
+
+  export { NavigationRouter };
   export function useRouter(): NavigationRouter;
   export function usePathname(): RoutePath;
-  export function useSearchParams(): URLSearchParams;
+  export function useSearchParams(): URLSearchParams & {
+    get(key: string): string | null;
+    getAll(): { [key: string]: string | string[] };
+  };
 }
+
+declare module 'next/link' {
+  export interface LinkProps
+    extends Omit<import('next/dist/client/link').LinkProps, 'href'> {
+    href:
+      | RoutePath
+      | {
+          pathname: RoutePath;
+          query?: {
+            [key: string]:
+              | string
+              | number
+              | boolean
+              | readonly string[]
+              | undefined;
+          };
+          hash?: string;
+        };
+  }
+
+  export default function Link(props: LinkProps): JSX.Element;
+}
+```
 
 ### npm 스크립트 사용
 

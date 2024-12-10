@@ -74,6 +74,28 @@ declare module 'next/navigation' {
     get(key: string): string | null;
     getAll(): { [key: string]: string | string[] };
   };
+}
+
+declare module 'next/link' {
+  export interface LinkProps
+    extends Omit<import('next/dist/client/link').LinkProps, 'href'> {
+    href:
+      | RoutePath
+      | {
+          pathname: RoutePath;
+          query?: {
+            [key: string]:
+              | string
+              | number
+              | boolean
+              | readonly string[]
+              | undefined;
+          };
+          hash?: string;
+        };
+  }
+
+  export default function Link(props: LinkProps): JSX.Element;
 }` : '';
 
   return `// This file is auto-generated. Do not edit manually.

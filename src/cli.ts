@@ -40,12 +40,23 @@ yargs(hideBin(process.argv))
                     describe: 'Path to the output TypeScript definition file',
                     type: 'string',
                     demandOption: true,
+                })
+                .option('o', {
+                    alias: 'override',
+                    type: 'boolean',
+                    describe: 'Override Next.js router types',
+                    default: false
                 });
         },
         (argv) => {
             try {
                 const routeType = determineRouteType(argv.pagesDir as string);
-                generateRoutes(argv.pagesDir as string, argv.outputFile as string, routeType);
+                generateRoutes(
+                    argv.pagesDir as string, 
+                    argv.outputFile as string, 
+                    routeType,
+                    argv.override as boolean
+                );
                 console.log(`Route definitions generated successfully for ${routeType} router.`);
             } catch (error) {
                 if (error instanceof Error) {

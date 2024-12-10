@@ -27,10 +27,14 @@ pnpm add generate-router
 npx generate-router ./pages ./types/routes.d.ts
 ```
 
-### Positional Arguments
+### 인자
 
 1. `<pagesDir>`: Next.js 프로젝트의 `pages` 또는 `app` 디렉토리 경로. (필수)
 2. `<outputFile>`: 생성된 TypeScript 정의 파일의 출력 경로. (필수)
+
+### 옵션
+
+- `-o, --override`: Next.js 라우터 타입을 오버라이드하여 타입 안전한 라우팅을 제공합니다. 활성화하면 `next/router`와 `next/navigation` 모듈에 대한 타입 정의가 추가됩니다. (선택, 기본값: false)
 
 ### 예시
 
@@ -47,7 +51,7 @@ pages/
 아래 명령어를 실행하면:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts
+npx generate-router ./pages ./types/routes.d.ts --override
 ```
 
 `./types/routes.d.ts` 파일이 다음 내용으로 생성됩니다:
@@ -62,7 +66,45 @@ type DynamicPaths =
   | `/user/${string}`;
 
 type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
-```
+
+// Next.js 라우터 타입 오버라이드 (--override 옵션 사용 시)
+declare module 'next/router' {
+  import type { NextRouter as OriginalNextRouter } from 'next/router';
+
+  interface UrlObject {
+    pathname: RoutePath;
+  }
+
+  interface NextRouter extends OriginalNextRouter {
+    push(
+      url: RoutePath | UrlObject,
+      as?: string | UrlObject,
+      options?: TransitionOptions,
+    ): Promise<boolean>;
+    replace(
+      url: RoutePath | UrlObject,
+      as?: string | UrlObject,
+      options?: TransitionOptions,
+    ): Promise<boolean>;
+  }
+
+  export function useRouter(): NextRouter;
+}
+
+declare module 'next/navigation' {
+  interface NavigationRouter {
+    push(href: RoutePath, options?: { scroll?: boolean }): void;
+    replace(href: RoutePath, options?: { scroll?: boolean }): void;
+    prefetch(href: RoutePath): void;
+    back(): void;
+    forward(): void;
+    refresh(): void;
+  }
+
+  export function useRouter(): NavigationRouter;
+  export function usePathname(): RoutePath;
+  export function useSearchParams(): URLSearchParams;
+}
 
 ### npm 스크립트 사용
 
@@ -70,7 +112,7 @@ type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
 
 ```json
 "scripts": {
-  "generate:routes": "generate-router ./pages ./src/routes.d.ts"
+  "generate:routes": "generate-router ./pages ./src/routes.d.ts --override"
 }
 ```
 
@@ -78,16 +120,6 @@ type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
 
 ```bash
 yarn generate:routes
-```
-
-### 코드에서 사용
-
-TypeScript 또는 JavaScript 코드 내에서 라이브러리를 사용할 수도 있습니다:
-
-```typescript
-import { generateRoutes } from 'generate-router';
-
-generateRoutes('./pages', './types/routes.d.ts');
 ```
 
 ## 개발
@@ -123,7 +155,6 @@ project-root/
 ├── jest.config.js           # Jest 설정
 ├── rollup.config.js         # Rollup 설정
 ├── tsconfig.json            # TypeScript 설정
-```
 
 ## 라이선스
 

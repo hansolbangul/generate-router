@@ -26,10 +26,14 @@ The library provides a CLI tool to generate TypeScript route definitions. After 
 npx generate-router ./pages ./types/routes.d.ts
 ```
 
-### Positional Arguments
+### Arguments
 
 1. `<pagesDir>`: Path to the `pages` or `app` directory in your Next.js project. (Required)
 2. `<outputFile>`: Path to the output TypeScript definition file. (Required)
+
+### Options
+
+- `-o, --override`: Override Next.js router types to provide type-safe routing. When enabled, it adds type definitions for `next/router` and `next/navigation` modules. (Optional, defaults to false)
 
 ### Example
 
@@ -46,7 +50,7 @@ pages/
 Running the following command:
 
 ```bash
-npx generate-router ./pages ./types/routes.d.ts
+npx generate-router ./pages ./types/routes.d.ts --override
 ```
 
 Will generate a file at `./types/routes.d.ts` with the following content:
@@ -61,6 +65,45 @@ type DynamicPaths =
     | `/user/${string}`;
 
 type RoutePath = StaticPaths | DynamicPaths | `${StaticPaths}?${string}`;
+
+// Next.js Router Type Overrides (when --override option is used)
+declare module 'next/router' {
+  import type { NextRouter as OriginalNextRouter } from 'next/router';
+
+  interface UrlObject {
+    pathname: RoutePath;
+  }
+
+  interface NextRouter extends OriginalNextRouter {
+    push(
+      url: RoutePath | UrlObject,
+      as?: string | UrlObject,
+      options?: TransitionOptions,
+    ): Promise<boolean>;
+    replace(
+      url: RoutePath | UrlObject,
+      as?: string | UrlObject,
+      options?: TransitionOptions,
+    ): Promise<boolean>;
+  }
+
+  export function useRouter(): NextRouter;
+}
+
+declare module 'next/navigation' {
+  interface NavigationRouter {
+    push(href: RoutePath, options?: { scroll?: boolean }): void;
+    replace(href: RoutePath, options?: { scroll?: boolean }): void;
+    prefetch(href: RoutePath): void;
+    back(): void;
+    forward(): void;
+    refresh(): void;
+  }
+
+  export function useRouter(): NavigationRouter;
+  export function usePathname(): RoutePath;
+  export function useSearchParams(): URLSearchParams;
+}
 ```
 
 ### Using npm scripts
@@ -69,7 +112,7 @@ You can also define a script in your `package.json` for easier usage:
 
 ```json
 "scripts": {
-  "generate:routes": "generate-router ./pages ./src/routes.d.ts"
+  "generate:routes": "generate-router ./pages ./src/routes.d.ts --override"
 }
 ```
 
@@ -77,16 +120,6 @@ Now you can run:
 
 ```bash
 yarn generate:routes
-```
-
-### Programmatic Usage
-
-You can also use the library in your TypeScript or JavaScript code:
-
-```typescript
-import { generateRoutes } from 'generate-router';
-
-generateRoutes('./pages', './types/routes.d.ts');
 ```
 
 ## Development

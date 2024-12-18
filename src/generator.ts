@@ -93,6 +93,7 @@ declare module 'next/link' {
           };
           hash?: string;
         };
+        children: React.ReactNode;
   }
 
   export default function Link(props: LinkProps): JSX.Element;
